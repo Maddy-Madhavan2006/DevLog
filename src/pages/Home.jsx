@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import BlogCard from "@/components/custom/Blogcard";
+import BlogCard from "@/components/custom/BlogCard";
 import Loader from "@/components/custom/Loader";
 
 const Home = () => {
