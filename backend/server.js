@@ -10,7 +10,7 @@ const app = express();
 // 🌍 CORS
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "https://devlog-dun.vercel.app",
     credentials: true,
   })
 );
