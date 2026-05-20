@@ -79,7 +79,7 @@ const Register = () => {
         await response.json();
 
       if (!response.ok) {
-        throw new toast.error(
+        throw new Error(
           data.message ||
             "Registration failed"
         );
