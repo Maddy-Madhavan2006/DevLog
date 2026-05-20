@@ -15,110 +15,89 @@ const resend = new Resend(
 
 // ✅ REGISTER
 exports.register = async (req, res) => {
-
-  console.log(req.body);
+  console.log("📥 REGISTER HIT:", req.body);
 
   try {
-
     const { name, email, password } = req.body;
 
-    // 🔍 CHECK EXISTING USER
+    // 🔴 BASIC VALIDATION
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        message: "Missing required fields",
+      });
+    }
+
+    // 🔍 CHECK USER EXISTS
     const [existingUser] = await db.query(
       "SELECT * FROM users WHERE email = ?",
       [email]
     );
 
     if (existingUser.length > 0) {
-
       return res.status(400).json({
         message: "Email already exists",
       });
-
     }
 
     // 🔐 HASH PASSWORD
-    const hashedPassword = await bcrypt.hash(
-      password,
-      10
-    );
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     // 🔢 GENERATE OTP
     const otp = generateOtp();
+    const otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
 
-    // ⏰ OTP EXPIRES IN 5 MINUTES
-    const otpExpiry = new Date(
-      Date.now() + 5 * 60 * 1000
-    );
+    console.log("🔢 OTP GENERATED:", otp);
 
     // 💾 INSERT USER
     await db.query(
-
-      `
-      INSERT INTO users
-      (
-        name,
-        email,
-        password,
-        otp,
-        otp_expiry,
-        is_verified
-      )
-      VALUES (?, ?, ?, ?, ?, ?)
-      `,
-
-      [
-        name,
-        email,
-        hashedPassword,
-        otp,
-        otpExpiry,
-        false,
-      ]
+      `INSERT INTO users (name, email, password, otp, otp_expiry, is_verified)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [name, email, hashedPassword, otp, otpExpiry, false]
     );
-    console.log("ABOUT TO SEND OTP");
-    console.log(email);
-    console.log(otp);
-    // 📧 SEND OTP EMAIL
-    await resend.emails.send({
 
-      from: "onboarding@resend.dev",
+    console.log("💾 USER STORED IN DB");
 
+    // 📧 SEND EMAIL (WITH FULL DEBUG)
+    console.log("📧 SENDING EMAIL TO:", email);
+
+    const emailResponse = await resend.emails.send({
+      from: "DevLog <onboarding@resend.dev>",
       to: email,
-
       subject: "DEVLOG Email Verification",
-
       html: `
-        <div>
-          <h1>DEVLOG OTP</h1>
-
-          <h2>${otp}</h2>
-
-          <p>
-            This OTP expires in 5 minutes.
-          </p>
-        </div>
+        <h1>DEVLOG OTP</h1>
+        <h2>${otp}</h2>
+        <p>Expires in 5 minutes</p>
       `,
     });
 
-    // ✅ RESPONSE
-    res.status(201).json({
+    console.log("📧 RESEND RESPONSE:", emailResponse);
 
+    // ❗ CHECK RESEND RESPONSE
+    if (!emailResponse || emailResponse.error) {
+      console.error("❌ EMAIL FAILED:", emailResponse);
+
+      return res.status(500).json({
+        message: "OTP email failed to send",
+        error: emailResponse,
+      });
+    }
+
+    // ✅ SUCCESS
+    return res.status(201).json({
       message: "OTP sent successfully",
-
       email,
-
     });
 
   } catch (error) {
+    console.error("🔥 REGISTER ERROR FULL:", error);
 
-    console.error(error);
-
-    res.status(500).json({
+    return res.status(500).json({
       message: "Server error",
+      error: error?.message || error,
     });
   }
 };
-
 
 
 // ✅ VERIFY OTP
