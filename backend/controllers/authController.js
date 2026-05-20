@@ -75,7 +75,9 @@ exports.register = async (req, res) => {
         false,
       ]
     );
-
+    console.log("ABOUT TO SEND OTP");
+    console.log(email);
+    console.log(otp);
     // 📧 SEND OTP EMAIL
     await resend.emails.send({
 
