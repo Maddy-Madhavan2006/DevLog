@@ -1,20 +1,31 @@
 import { useState } from "react";
 
-import { useLocation, useNavigate } from "react-router-dom";
+import {
+  ArrowLeft,
+  MailCheck,
+} from "lucide-react";
+
+import {
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
+
+import toast from "react-hot-toast";
 
 
 const VerifyOtp = () => {
 
   const [otp, setOtp] = useState("");
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] =
+    useState(false);
 
   const navigate = useNavigate();
 
   const location = useLocation();
 
-  // 📧 GET EMAIL FROM REGISTER PAGE
-  const email = location.state?.email;
+  const email =
+    location.state?.email;
 
 
   const handleVerifyOtp = async (e) => {
@@ -22,61 +33,60 @@ const VerifyOtp = () => {
     e.preventDefault();
 
     if (!otp) {
-      return alert("Please enter OTP");
+
+      return toast.error(
+        "Please enter OTP"
+      );
+
     }
 
     try {
 
       setLoading(true);
 
-      const response = await fetch(
+      const response =
+        await fetch(
 
-        `${import.meta.env.VITE_API_URL}/auth/verify-otp`,
+          `${import.meta.env.VITE_API_URL}/auth/verify-otp`,
 
-        {
-          method: "POST",
+          {
+            method: "POST",
 
-          headers: {
-            "Content-Type": "application/json",
-          },
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
 
-          body: JSON.stringify({
-            email,
-            otp,
-          }),
-        }
-      );
+            body: JSON.stringify({
+              email,
+              otp,
+            }),
+          }
+        );
 
-      const data = await response.json();
+      const data =
+        await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message);
+
+        throw new Error(
+          data.message
+        );
+
       }
 
-      // 💾 SAVE TOKEN
-      localStorage.setItem(
-        "token",
-        data.token
-      );
-
-      // 💾 SAVE USER
-      localStorage.setItem(
-        "user",
-        JSON.stringify(data.user)
-      );
-
-      alert(
+     
+      toast.success(
         "Account verified successfully"
       );
 
-      // ✅ REDIRECT
-      navigate("/");
+      navigate("/login");
 
     } catch (error) {
 
       console.error(error);
 
-      alert(
+      toast.error(
         error.message ||
         "Verification failed"
       );
@@ -91,81 +101,170 @@ const VerifyOtp = () => {
 
   return (
 
-    <div
+    <section
       className="
         min-h-screen
         flex
         items-center
         justify-center
-        bg-gray-100
+        bg-zinc-100
         px-4
+        py-10
       "
     >
 
       <div
         className="
-          bg-white
-          p-8
-          rounded-2xl
-          shadow-lg
           w-full
-          max-w-md
+          max-w-2xl
+          bg-white
+          rounded-[2rem]
+          shadow-2xl
+          p-8
+          md:p-12
+          border
+          border-zinc-200
         "
       >
 
-        <h1
+        {/* ICON */}
+        <div
           className="
-            text-3xl
-            font-bold
-            text-center
-            mb-2
+            w-24
+            h-24
+            mx-auto
+            rounded-full
+            bg-zinc-100
+            flex
+            items-center
+            justify-center
+            mb-8
           "
         >
-          Verify OTP
-        </h1>
 
-        <p
-          className="
-            text-gray-500
-            text-center
-            mb-6
-          "
-        >
-          Enter the OTP sent to your email
-        </p>
+          <MailCheck
+            className="
+              w-12
+              h-12
+              text-black
+            "
+          />
 
+        </div>
+
+
+        {/* TITLE */}
+        <div className="text-center">
+
+          <h1
+            className="
+              text-5xl
+              font-black
+              tracking-tight
+              mb-4
+            "
+          >
+            Verify Your Email
+          </h1>
+
+          <p
+            className="
+              text-zinc-500
+              text-lg
+              leading-relaxed
+            "
+          >
+            We’ve sent a 6-digit
+            verification code to
+          </p>
+
+          <p
+            className="
+              text-black
+              font-semibold
+              text-xl
+              mt-1
+            "
+          >
+            {email}
+          </p>
+
+        </div>
+
+
+        {/* OTP FORM */}
         <form
           onSubmit={handleVerifyOtp}
-          className="space-y-4"
+          className="mt-12"
         >
 
+          <p
+            className="
+              text-center
+              text-zinc-600
+              mb-6
+              text-lg
+            "
+          >
+            Enter the 6-digit code
+            below
+          </p>
+
+
+          {/* OTP INPUT */}
           <input
             type="text"
-            placeholder="Enter OTP"
+            maxLength={6}
             value={otp}
             onChange={(e) =>
               setOtp(e.target.value)
             }
+            placeholder="------"
             className="
               w-full
-              border
-              rounded-lg
-              p-3
+              h-20
+              rounded-2xl
+              border-2
+              border-zinc-300
+              bg-white
+              text-center
+              text-4xl
+              tracking-[1rem]
+              font-bold
               outline-none
-              focus:ring-2
-              focus:ring-black
+              focus:border-black
+              transition
             "
           />
 
+
+          {/* TIMER */}
+          <p
+            className="
+              text-center
+              text-zinc-500
+              mt-6
+              text-base
+            "
+          >
+            This code will expire
+            in 5 minutes
+          </p>
+
+
+          {/* BUTTON */}
           <button
             type="submit"
             disabled={loading}
             className="
               w-full
+              mt-10
+              h-16
+              rounded-2xl
               bg-black
               text-white
-              py-3
-              rounded-lg
+              text-xl
+              font-semibold
               hover:opacity-90
               transition
             "
@@ -181,9 +280,35 @@ const VerifyOtp = () => {
 
         </form>
 
+
+        {/* BACK BUTTON */}
+        <button
+          onClick={() =>
+            navigate("/register")
+          }
+          className="
+            flex
+            items-center
+            gap-2
+            mx-auto
+            mt-10
+            text-zinc-500
+            hover:text-black
+            transition
+          "
+        >
+
+          <ArrowLeft
+            className="w-4 h-4"
+          />
+
+          Back to Register
+
+        </button>
+
       </div>
 
-    </div>
+    </section>
   );
 };
 
