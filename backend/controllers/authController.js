@@ -61,7 +61,7 @@ exports.register = async (req, res) => {
     console.log("📧 SENDING EMAIL TO:", email);
 
     const emailResponse = await resend.emails.send({
-      from: "DevLog <onboarding@resend.dev>",
+      from: process.env.RESEND_FROM_EMAIL,
       to: email,
       subject: "DEVLOG Email Verification",
       html: `
