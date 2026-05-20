@@ -13,6 +13,7 @@ import EditBlog from "@/pages/EditBlog";
 
 import Login from "@/pages/auth/Login";
 import Register from "@/pages/auth/Register";
+import VerifyOtp from "@/pages/auth/VerifyOtp";
 
 const AppRoutes = () => {
   return (
@@ -39,6 +40,7 @@ const AppRoutes = () => {
         <Route path="/login" element={<Login />} />
 
         <Route path="/register" element={<Register />} />
+        <Route path="/verify-otp"element={<VerifyOtp />}/>
 
       </Route>
 

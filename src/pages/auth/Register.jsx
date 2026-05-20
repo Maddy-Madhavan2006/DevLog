@@ -85,9 +85,13 @@ const Register = () => {
         );
       }
 
-      toast.success("Registration successful ✅");
+     toast.success("OTP sent successfully ✅");
 
-      navigate("/login");
+      navigate("/verify-otp", {
+        state: {
+          email: formData.email,
+        },
+      });
 
     } catch (error) {
       console.error(error);
